@@ -14,6 +14,8 @@ void printMergedTree();
 
 int main()
 {
+	printRandomNumbersToFile(1, 500, 100, "data2.txt");
+
 
 
 	return 0;
