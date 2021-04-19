@@ -1,9 +1,11 @@
 #pragma once
 
 
+#include <iomanip>
 #include <iostream>
 #include <queue>
-
+#define COUNT 10
+static int pos = 1;
 
 struct b_node
 {	b_node* left;
@@ -11,48 +13,209 @@ struct b_node
 	b_node* right;
 };
 
+/// <summary>
+/// binary search tree data structure
+/// </summary>
 class Bll
 {
 public:
+	/// <summary>
+	/// Initializes a new instance of the <see cref="Bll"/> class.
+	/// </summary>
 	Bll();
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="Bll"/> class.
+	/// </summary>
+	/// <param name="maxSize">The maximum size.</param>
 	Bll(int maxSize);
+
+
+	/// <summary>
+	/// Copy Constructor initializes a new instance of the
+	/// <see cref="Bll"/> class.
+	/// </summary>
+	/// <param name="originalTree">The original tree.</param>
 	Bll(const Bll& originalTree);
+
+
+	/// <summary>
+	/// Move operator= copies from the specified original tree.
+	/// </summary>
+	/// <param name="originalTree">The original tree.</param>
 	void operator=(Bll& originalTree);
+
+	/// <summary>
+	/// Allows the user to pass one of these into traverseTree method and get
+	/// a tree printed out in the order they wish
+	/// </summary>
 	enum  OrderType {
 		PRE_ORDER,
 		IN_ORDER,
 		POST_ORDER,
 		BREADTH_FIRST,
-		REVERSE_ORDER
+		REVERSE_ORDER,
+		TWO_DIMENSIONS
 	};
-	bool addItem(int k);
-	bool deleteItem(int k);
+	/// <summary>
+	/// Adds item to the tree
+	/// </summary>
+	/// <param name="k">The key value.</param>
+	/// <returns>true if added: else false</returns>
+	bool addItem(double k);
+
+
+	/// <summary>
+	/// Deletes the item.
+	/// </summary>
+	/// <param name="k">The k.</param>
+	/// <returns></returns>
+	bool deleteItem(double k);
+	/// <summary>
+	/// Determines whether this instance is empty.
+	/// </summary>
+	/// <returns>
+	///   <c>true</c> if this instance is empty; otherwise, <c>false</c>.
+	/// </returns>
 	bool isEmpty()const;
+	/// <summary>
+	/// Determines whether this instance is full.
+	/// </summary>
+	/// <returns>
+	///   <c>true</c> if this instance is full; otherwise, <c>false</c>.
+	/// </returns>
 	bool isFull()const;
+	/// <summary>
+	/// Makes the tree empty.
+	/// </summary>
+	/// <returns></returns>
 	bool makeEmpty();
+	/// <summary>
+	/// Traverses the tree.
+	/// </summary>
+	/// <param name="order">The order to traverse the tree.</param>
 	void traverseTree(OrderType order)const;
+	/// <summary>
+	/// Gets the qty.
+	/// </summary>
+	/// <returns>the number of elements in the tree</returns>
 	int getQty()const;
+	/// <summary>
+	/// Gets the count.
+	/// </summary>
+	/// <returns>counts the nodes and returns the count</returns>
 	int getCount()const;
-	bool findItem(int k, int& found)const;
+	/// <summary>
+	/// Finds the item.
+	/// </summary>
+	/// <param name="k">The key to look for.</param>
+	/// <param name="found">The found.</param>
+	/// <returns></returns>
+	bool findItem(double k, double& found)const;
+	/// <summary>
+	/// outputs the tree
+	/// </summary>
+	/// <param name="os">The output stream if being printed out to file.</param>
+	/// <returns>true if prints: else false</returns>
+	bool display(std::ofstream& os)const;
+	/// <summary>
+	/// Finalizes an instance of the <see cref="Bll"/> class.
+	/// </summary>
 	~Bll();
 
 private:
 	b_node* tt;
 	int qty;
 	int max;
-	bool pAdd(b_node* tree, int& k);
-	bool pDelete(b_node*& tree, int& k);
+	/// <summary>
+	/// private auxiliary method to help with adding to the tree.
+	/// </summary>
+	/// <param name="tree">The tree.</param>
+	/// <param name="k">The key.</param>
+	/// <returns>true if added: else false</returns>
+	bool pAdd(b_node* tree, double& k);
+	/// <summary>
+	/// private auxiliary method to help with deleting element from tree
+	/// </summary>
+	/// <param name="tree">The tree.</param>
+	/// <param name="k">The key.</param>
+	/// <returns>true if deleted: else false</returns>
+	bool pDelete(b_node*& tree, double& k);
+	/// <summary>
+	/// private auxiliary function called when a node is found to
+	/// be deleted from the tree.
+	/// </summary>
+	/// <param name="tree">The tree.</param>
+	/// <returns></returns>
 	bool deleteNode(b_node*& tree);
-	static void getPredecessor(b_node* tree, int& k);
+	/// <summary>
+	/// Gets the predecessor node when deleting nodes what need to be relinked
+	/// </summary>
+	/// <param name="tree">The tree.</param>
+	/// <param name="k">The k.</param>
+	static void getPredecessor(b_node* tree, double& k);
+	/// <summary>
+	/// Counts the nodes.
+	/// </summary>
+	/// <param name="tree">The tree.</param>
+	/// <returns></returns>
 	static int countNodes(b_node* tree);
-	bool retrieve(b_node* tree,const int k, int& found)const;
+	/// <summary>
+	/// Retrieves the specified tree.
+	/// </summary>
+	/// <param name="tree">The tree.</param>
+	/// <param name="k">The k.</param>
+	/// <param name="found">The found.</param>
+	/// <returns></returns>
+	bool retrieve(b_node* tree, const double k, double& found)const;
+	/// <summary>
+	/// Copies the tree.
+	/// </summary>
+	/// <param name="copy">The copy.</param>
+	/// <param name="originalTree">The original tree.</param>
 	static void copyTree(b_node*& copy, const b_node* originalTree);
+	/// <summary>
+	/// Destroys the specified tree.
+	/// </summary>
+	/// <param name="tree">The tree.</param>
 	void destroy(b_node*& tree);
+	/// <summary>
+	/// Prints the tree.
+	/// </summary>
+	/// <param name="tree">The tree.</param>
+	/// <param name="os">The os.</param>
+	static void printTree(b_node* tree, std::ofstream& os);
+	/// <summary>
+	/// auxiliary pre-order traversal helper
+	/// </summary>
+	/// <param name="tree">The tree.</param>
 	static void preOrderHelper(b_node* tree);
+	/// <summary>
+	/// auxiliary in-order traversal helper
+	/// </summary>
+	/// <param name="tree">The tree.</param>
 	static void inOrderHelper(b_node* tree);
+	/// <summary>
+	/// auxiliary post-order traversal helper
+	/// </summary>
+	/// <param name="tree">The tree.</param>
 	static void postOrderHelper(b_node* tree);
+	/// <summary>
+	/// auxiliary breadth-first-order traversal helper
+	/// </summary>
+	/// <param name="tree">The tree.</param>
 	static void breadthFirstHelper(b_node* tree);
+	/// <summary>
+	/// auxiliary reverse-order traversal helper
+	/// </summary>
+	/// <param name="tree">The tree.</param>
 	static void reverseOrderHelper(b_node* tree);
+	/// <summary>
+	/// auxiliary 2D-order traversal helper
+	/// </summary>
+	/// <param name="tree">The tree.</param>
+	/// <param name="space">The space between nodes.</param>
+	static void twoDimensionalHelper(b_node* tree, int space);
 
 };//end class Bll interface
 
@@ -91,13 +254,12 @@ inline void Bll::operator=(Bll& originalTree)
 
 
 
-inline bool Bll::addItem(int k)//working
+inline bool Bll::addItem(double k)//working
 {
 	if (isFull())
 		return false;
 	if (tt == NULL)
 	{
-		std::cout << "adding root node key: "<< k << std::endl;
 		tt = new b_node;
 		tt->left = NULL;
 		tt->right = NULL;
@@ -109,7 +271,7 @@ inline bool Bll::addItem(int k)//working
 	return pAdd(tt, k);
 }//end method addItem
 
-inline bool Bll::deleteItem(int k)//working
+inline bool Bll::deleteItem(double k)//working
 {
 	return pDelete(tt, k);
 
@@ -158,6 +320,9 @@ inline void Bll::traverseTree(OrderType order)const
 		case REVERSE_ORDER: std::cout << "\nReverse-Order tree traversal:\n";
 						reverseOrderHelper(tt);
 						break;
+		case TWO_DIMENSIONS: std::cout << "\nTwo-Dimensional-Order tree traversal:\n";
+						twoDimensionalHelper(tt, 0);
+						break;
 	}
 
 	std::cout << std::endl;
@@ -176,11 +341,18 @@ inline int Bll::getCount()const
 }//end method getCount
 
 
-inline bool Bll::findItem(int k, int& found)const
+inline bool Bll::findItem(double k, double& found)const
 {
 
 	return retrieve(tt, k, found);
-}//end method findItem
+}
+inline bool Bll::display(std::ofstream& os)const
+{
+
+	printTree(tt, os);
+	return true;
+}
+//end method findItem
 
 inline Bll::~Bll()
 {
@@ -188,15 +360,18 @@ inline Bll::~Bll()
 }//end ~destructor
 
 
-inline bool Bll::pAdd(b_node* tree, int& k)//working
+inline bool Bll::pAdd(b_node* tree, double& k)//working
 {
 	if (tree->num == k || qty >= max)
+	{
+		std::cout << "duplicate, cannot add element "<< k << std::endl;
 		return false; // duplicate item, or max size reached
+	}
+
 	if (k < tree->num)//walk left
 	{
 		if (tree->left == NULL)//add element here
 		{
-			std::cout << "adding node key: "<< k << std::endl;
 			tree->left = new b_node;
 			tree->left->left = tree->left->right = NULL;
 			tree->left->num = k;
@@ -210,7 +385,6 @@ inline bool Bll::pAdd(b_node* tree, int& k)//working
 	{
 		if (tree->right == NULL)//add element here
 		{
-			std::cout << "adding node key: "<< k << std::endl;
 			tree->right = new b_node;
 			tree->right->left = tree->right->right = NULL;
 			tree->right->num = k;
@@ -220,12 +394,12 @@ inline bool Bll::pAdd(b_node* tree, int& k)//working
 		else
 			pAdd(tree->right, k);
 	}
-	return false;
+	//return false;
 
 
 }//end auxiliary method pAdd
 
-inline bool Bll::pDelete(b_node*& tree, int& k)//working
+inline bool Bll::pDelete(b_node*& tree, double& k)//working
 {
 	if (k < tree->num)
 	{
@@ -245,13 +419,12 @@ inline bool Bll::pDelete(b_node*& tree, int& k)//working
 
 inline bool Bll::deleteNode(b_node*& tree)//working
 {
-	int _k = 0;
+	double _k = 0;
 	b_node* tempPtr;
 
 	tempPtr = tree;
 	if (tree->left == NULL)
 	{
-		std::cout << "deleting node key: "<< tempPtr->num << std::endl;
 		tree = tree->right;
 		delete tempPtr;
 		qty--;
@@ -259,7 +432,6 @@ inline bool Bll::deleteNode(b_node*& tree)//working
 	}
 	else if (tree->right == NULL)
 	{
-		std::cout << "deleting node key: "<< tempPtr->num << std::endl;
 		tree = tree->left;
 		delete tempPtr;
 		qty--;
@@ -274,7 +446,7 @@ inline bool Bll::deleteNode(b_node*& tree)//working
 
 }//end auxiliary method deleteNode
 
-inline void Bll::getPredecessor(b_node* tree, int& k)//working
+inline void Bll::getPredecessor(b_node* tree, double& k)//working
 {
 	while (tree->right != NULL)
 		tree = tree->right;
@@ -289,7 +461,7 @@ inline int Bll::countNodes(b_node* tree)//working
 		return countNodes(tree->left) + countNodes(tree->right) + 1;
 }//end auxiliary method countNodes
 
-inline bool Bll::retrieve(b_node* tree,const int k, int& found)const//working
+inline bool Bll::retrieve(b_node* tree,const double k, double& found)const//working
 {
 	if (tree == NULL)
 		return false;
@@ -330,7 +502,22 @@ inline void Bll::destroy(b_node*& tree)
 		qty--;
 		delete tree;
 	}
-}//end auxiliary method destroy
+}
+inline void Bll::printTree(b_node* tree, std::ofstream& os)
+{
+
+	if (tree != NULL)
+	{
+		printTree(tree->left, os);
+		os << std::setw(7)<< std::left << tree->num
+						  << (pos % 10 == 0 ? '\n': ' ');
+		std::cout << tree->num << " ";
+		pos++;
+		printTree(tree->right, os);
+
+	}
+}
+//end auxiliary method destroy
 
 inline void Bll::preOrderHelper(b_node* tree)
 {
@@ -395,4 +582,18 @@ inline void Bll::reverseOrderHelper(b_node* tree)
 		std::cout << tree->num << " ";
 		reverseOrderHelper(tree->left);
 	}
+}
+
+inline void Bll::twoDimensionalHelper(b_node* tree, int space)
+{
+	if (tree == NULL)
+		return;
+	space += COUNT;
+	twoDimensionalHelper(tree->right, space);
+	std::cout << std::endl;
+	for (int i = COUNT; i < space; i++)
+		std::cout << " ";
+	std::cout << tree->num << "\n";
+	twoDimensionalHelper(tree->left, space);
+
 }
