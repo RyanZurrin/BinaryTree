@@ -512,7 +512,7 @@ inline void Bll::printTree(b_node* tree, std::ofstream& os)
 		os << std::setw(7)<< std::left << tree->num
 						  << (pos % 10 == 0 ? '\n': ' ');
 		std::cout << tree->num << " ";
-		++pos;
+		pos++;
 		printTree(tree->right, os);
 
 	}

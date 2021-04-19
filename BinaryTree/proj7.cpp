@@ -6,33 +6,20 @@
 #include <stdlib.h>
 #include <ctime>
 
-void printRandomNumbersToFile(
-	int min, int max, int amount, const std::string& filename);
-void printErrorLogAndDeleteErrorKeys(std::set<double> s);
-void printMergedTree();
-void dataLoader(Bll* bt, std::string);
-static void printVector(std::vector<double> v);
-void printSet(std::set<double> s);
-
-static struct listHolder
+struct listHolder
 {
 	/// <summary>
 	/// The main Tree list
 	/// </summary>
 	Bll* mainTree;
-
-
 	/// <summary>
 	/// //holds each repeated error value in the order that it happened
 	/// </summary>
 	std::vector<double> errList;
-
-
 	/// <summary>
 	/// Set of each error with no duplicates of the errors
 	/// </summary>
 	std::set<double> errorSet;
-
 	/// <summary>
 	/// Initializes a new instance of the <see cref="listHolder"/> struct.
 	/// </summary>
@@ -47,7 +34,15 @@ static struct listHolder
 	{
 		delete mainTree;
 	}
-}lh;
+};
+
+void printRandomNumbersToFile(
+	int, int, int, const std::string&);
+void printErrorLogAndDeleteErrorKeys(listHolder* );
+void printMergedTree(listHolder*);
+void dataLoader(listHolder*, std::string);
+static void printVector(std::vector<double>&);
+void printSet(std::set<double>);
 
 /// <summary>
 /// The Main method.
@@ -55,27 +50,28 @@ static struct listHolder
 /// <returns>int 0 if all runs well: else some other value</returns>
 int main()
 {
+	listHolder* lh = new listHolder;
 	std::ofstream mergePrinter;
-	printRandomNumbersToFile(1, 500, 100, "data2.txt");
-	dataLoader(lh.mainTree, "data1.txt");
-	//lh.mainTree->traverseTree(Bll::IN_ORDER);
-	//std::cout << "qty round 1: " << lh.mainTree->getQty() << std::endl;
-	//std::cout << "vector error list 1: " << std::endl;
-	//printVector(lh.errList);
-	//std::cout << "vector error count 1: " << lh.errList.size() << std::endl;
-	//std::cout << "set error list 1: " << std::endl;
-	//printSet(lh.errorSet);
-	dataLoader(lh.mainTree, "data2.txt");
-	//lh.mainTree->traverseTree(Bll::IN_ORDER);
-	//std::cout << "qty round 2: " << lh.mainTree->getQty() << std::endl;
-	//std::cout << "vector error list 2: " << std::endl;
-	//printVector(lh.errList);
-	//std::cout << "vector error count 2: " << lh.errList.size() << std::endl;
+	printRandomNumbersToFile(1, 600, 500, "data2.txt");
+	dataLoader(lh, "data1.txt");
+	lh->mainTree->traverseTree(Bll::IN_ORDER);
+	std::cout << "qty round 1: " << lh->mainTree->getQty() << std::endl;
+	std::cout << "vector error list 1: " << std::endl;
+	printVector(lh->errList);
+	std::cout << "vector error count 1: " << lh->errList.size() << std::endl;
+	std::cout << "set error list 1: " << std::endl;
+	printSet(lh->errorSet);
+	dataLoader(lh, "data2.txt");
+	lh->mainTree->traverseTree(Bll::IN_ORDER);
+	std::cout << "qty round 2: " << lh->mainTree->getQty() << std::endl;
+	std::cout << "vector error list: " << std::endl;
+	printVector(lh->errList);
+	std::cout << "vector error count 2: " << lh->errList.size() << std::endl;
 	std::cout << "set error list: " << std::endl;
-	printSet(lh.errorSet);
-	printErrorLogAndDeleteErrorKeys(lh.errorSet);
-	printMergedTree();
-	std::cout << "\nqty of merged tree: " << lh.mainTree->getQty() << std::endl;
+	printSet(lh->errorSet);
+	printErrorLogAndDeleteErrorKeys(lh);
+	printMergedTree(lh);
+	std::cout << "\nqty of merged tree: " << lh->mainTree->getQty() << std::endl;
 
 	return 0;
 }
@@ -108,20 +104,22 @@ void printRandomNumbersToFile(
 /// Prints the error log and deletes the  error keys from tree list
 /// </summary>
 /// <param name="s">The set that holds the error values.</param>
-void printErrorLogAndDeleteErrorKeys(std::set<double> s)
+void printErrorLogAndDeleteErrorKeys(listHolder* lh)
 {
 	std::ofstream output;
 	output.open("errors.txt");
+	int pos = 1;
 	time_t* timeReport = new time_t;
 	struct tm* t_info;
 	time(timeReport);
 	t_info = localtime(timeReport);
 	output << "Error log generated on: " << asctime(t_info) << std::endl;
 		std::set<double>::iterator it;
-	for(it=s.begin(); it != s.end();it++)
+	for(it=lh->errorSet.begin(); it != lh->errorSet.end();it++)
 	{
-		output<<*it<<"\n";
-		lh.mainTree->deleteItem(*it);
+		output<< std::setw(6)<< std::left <<*it<<(pos%10==0?'\n':' ');
+		lh->mainTree->deleteItem(*it);
+		pos++;
 	}
 	output.close();
 }//end function printErrorLogAndDeleteErrorKeys
@@ -129,12 +127,12 @@ void printErrorLogAndDeleteErrorKeys(std::set<double> s)
 /// <summary>
 /// Prints the merged tree.
 /// </summary>
-void printMergedTree()
+void printMergedTree(listHolder* lh)
 {
 	std::ofstream output;
 	output.open("merged.txt");
 	std::cout << "merged list printed to file: "<< std::endl;
-	lh.mainTree->display(output);
+	lh->mainTree->display(output);
 	output.close();
 }//end function printMergedTree
 
@@ -143,7 +141,7 @@ void printMergedTree()
 /// </summary>
 /// <param name="bt">The binary tree to load.</param>
 /// <param name="fileName">Name of the file to load from.</param>
-void dataLoader(Bll* bt, std::string fileName)
+void dataLoader(listHolder* lh, std::string fileName)
 {
 	std::ifstream inFile;
 	double toList;
@@ -176,11 +174,11 @@ void dataLoader(Bll* bt, std::string fileName)
 	while (!inFile.eof())
 	{
 		inFile >> toList;
-		goodData = bt->addItem(toList);
+		goodData = lh->mainTree->addItem(toList);
 		if (goodData == false)
 		{
-			lh.errList.push_back(toList);
-			lh.errorSet.insert(toList);
+			lh->errList.push_back(toList);
+			lh->errorSet.insert(toList);
 		}
 	}
 
@@ -189,7 +187,11 @@ void dataLoader(Bll* bt, std::string fileName)
 }//end function listLoader
 
 
-void printVector(std::vector<double> v)
+/// <summary>
+/// Prints the vector.
+/// </summary>
+/// <param name="v">The v.</param>
+void printVector(std::vector<double>& v)
 {
 	const int size = v.size();
 	std::cout << "vector: ";
@@ -201,6 +203,10 @@ void printVector(std::vector<double> v)
 	std::cout << std::endl;
 }//end function printVectorValues
 
+/// <summary>
+/// Prints the set.
+/// </summary>
+/// <param name="s">The s.</param>
 void printSet(std::set<double> s)
 {
 	std::set<double>::iterator it;
