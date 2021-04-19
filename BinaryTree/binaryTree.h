@@ -364,7 +364,6 @@ inline bool Bll::pAdd(b_node* tree, double& k)//working
 {
 	if (tree->num == k || qty >= max)
 	{
-		std::cout << "duplicate, cannot add element "<< k << std::endl;
 		return false; // duplicate item, or max size reached
 	}
 

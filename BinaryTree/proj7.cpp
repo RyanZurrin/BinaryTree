@@ -13,7 +13,8 @@ struct listHolder
 	/// </summary>
 	Bll* mainTree;
 	/// <summary>
-	/// //holds each repeated error value in the order that it happened
+	/// //holds each repeated error value in the order that it happened, is
+	/// useful to keep track of the total number of errors as well.
 	/// </summary>
 	std::vector<double> errList;
 	/// <summary>
@@ -51,27 +52,10 @@ void printSet(std::set<double>);
 int main()
 {
 	listHolder* lh = new listHolder;
-	std::ofstream mergePrinter;
-	printRandomNumbersToFile(1, 600, 500, "data2.txt");
 	dataLoader(lh, "data1.txt");
-	lh->mainTree->traverseTree(Bll::IN_ORDER);
-	std::cout << "qty round 1: " << lh->mainTree->getQty() << std::endl;
-	std::cout << "vector error list 1: " << std::endl;
-	printVector(lh->errList);
-	std::cout << "vector error count 1: " << lh->errList.size() << std::endl;
-	std::cout << "set error list 1: " << std::endl;
-	printSet(lh->errorSet);
 	dataLoader(lh, "data2.txt");
-	lh->mainTree->traverseTree(Bll::IN_ORDER);
-	std::cout << "qty round 2: " << lh->mainTree->getQty() << std::endl;
-	std::cout << "vector error list: " << std::endl;
-	printVector(lh->errList);
-	std::cout << "vector error count 2: " << lh->errList.size() << std::endl;
-	std::cout << "set error list: " << std::endl;
-	printSet(lh->errorSet);
 	printErrorLogAndDeleteErrorKeys(lh);
 	printMergedTree(lh);
-	std::cout << "\nqty of merged tree: " << lh->mainTree->getQty() << std::endl;
 
 	return 0;
 }
@@ -113,8 +97,10 @@ void printErrorLogAndDeleteErrorKeys(listHolder* lh)
 	struct tm* t_info;
 	time(timeReport);
 	t_info = localtime(timeReport);
-	output << "Error log generated on: " << asctime(t_info) << std::endl;
-		std::set<double>::iterator it;
+	output << "Error log generated on: " << asctime(t_info) <<"\n"
+		   << "Total errors counted: "<< lh->errList.size() << "\n"
+		   << "Unique errors logged: "<< lh->errorSet.size() << std::endl;
+	std::set<double>::iterator it;
 	for(it=lh->errorSet.begin(); it != lh->errorSet.end();it++)
 	{
 		output<< std::setw(6)<< std::left <<*it<<(pos%10==0?'\n':' ');
