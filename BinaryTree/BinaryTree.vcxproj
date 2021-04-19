@@ -147,6 +147,8 @@
   <ItemGroup>
     <Text Include="data1.txt" />
     <Text Include="data2.txt" />
+    <Text Include="errors.txt" />
+    <Text Include="merged.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

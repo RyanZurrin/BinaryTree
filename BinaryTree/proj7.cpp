@@ -1,137 +1,211 @@
 #include <fstream>
 #include "binaryTree.h"
 #include <string>
-#include <random>
-#include <iostream>
+#include <set>
+#include <sstream>
 #include <stdlib.h>
-#include <time.h>
+#include <ctime>
+
 void printRandomNumbersToFile(
 	int min, int max, int amount, const std::string& filename);
-void readFileIntoTree(Bll* tree);
-bool isDuplicate(Bll* tree, std::ifstream infile);
-void printErrorLog();
+void printErrorLogAndDeleteErrorKeys(std::set<double> s);
 void printMergedTree();
+void dataLoader(Bll* bt, std::string);
+static void printVector(std::vector<double> v);
+void printSet(std::set<double> s);
 
+static struct listHolder
+{
+	/// <summary>
+	/// The main Tree list
+	/// </summary>
+	Bll* mainTree;
+
+
+	/// <summary>
+	/// //holds each repeated error value in the order that it happened
+	/// </summary>
+	std::vector<double> errList;
+
+
+	/// <summary>
+	/// Set of each error with no duplicates of the errors
+	/// </summary>
+	std::set<double> errorSet;
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="listHolder"/> struct.
+	/// </summary>
+	listHolder()
+	{
+		mainTree = new Bll;
+	}
+	/// <summary>
+	/// Finalizes an instance of the <see cref="listHolder"/> class.
+	/// </summary>
+	~listHolder()
+	{
+		delete mainTree;
+	}
+}lh;
+
+/// <summary>
+/// The Main method.
+/// </summary>
+/// <returns>int 0 if all runs well: else some other value</returns>
 int main()
 {
+	std::ofstream mergePrinter;
 	printRandomNumbersToFile(1, 500, 100, "data2.txt");
-
-
+	dataLoader(lh.mainTree, "data1.txt");
+	//lh.mainTree->traverseTree(Bll::IN_ORDER);
+	//std::cout << "qty round 1: " << lh.mainTree->getQty() << std::endl;
+	//std::cout << "vector error list 1: " << std::endl;
+	//printVector(lh.errList);
+	//std::cout << "vector error count 1: " << lh.errList.size() << std::endl;
+	//std::cout << "set error list 1: " << std::endl;
+	//printSet(lh.errorSet);
+	dataLoader(lh.mainTree, "data2.txt");
+	//lh.mainTree->traverseTree(Bll::IN_ORDER);
+	//std::cout << "qty round 2: " << lh.mainTree->getQty() << std::endl;
+	//std::cout << "vector error list 2: " << std::endl;
+	//printVector(lh.errList);
+	//std::cout << "vector error count 2: " << lh.errList.size() << std::endl;
+	std::cout << "set error list: " << std::endl;
+	printSet(lh.errorSet);
+	printErrorLogAndDeleteErrorKeys(lh.errorSet);
+	printMergedTree();
+	std::cout << "\nqty of merged tree: " << lh.mainTree->getQty() << std::endl;
 
 	return 0;
 }
+
 /// <summary>
 /// Prints random numbers to file.
 /// </summary>
-/// <param name="amount">The amount.</param>
-/// <param name="filename">The filename.</param>
+/// <param name="min">the lower bound of the random numbers</param>
+/// <param name="max">the upper bound of the random numbers</param>
+/// <param name="amount">The total amount of random numbers to generate.</param>
+/// <param name="filename">The filename to store them in.</param>
 void printRandomNumbersToFile(
 	int min, int max, int amount,  const std::string& filename)
 {
-	std::srand(static_cast<unsigned int>(time(nullptr)));
+	srand(static_cast<unsigned int>(time(NULL)));
 	std::ofstream file;
 	file.open(filename.c_str());
 	int data;
+	int count = 1;
 	for (int index = 0; index < amount; index++)
 	{
 		data =  min + rand() % (( max + 1 ) - min);
-		file << data << '\n';
+		file << data << (count % 10 == 0 ? '\n' : ' ');
+		count++;
 	}
 	file.close();
-}
+}//end function printRandomNumbersToFile
 
-void readFileIntoTree(Bll* tree)
+/// <summary>
+/// Prints the error log and deletes the  error keys from tree list
+/// </summary>
+/// <param name="s">The set that holds the error values.</param>
+void printErrorLogAndDeleteErrorKeys(std::set<double> s)
 {
+	std::ofstream output;
+	output.open("errors.txt");
+	time_t* timeReport = new time_t;
+	struct tm* t_info;
+	time(timeReport);
+	t_info = localtime(timeReport);
+	output << "Error log generated on: " << asctime(t_info) << std::endl;
+		std::set<double>::iterator it;
+	for(it=s.begin(); it != s.end();it++)
+	{
+		output<<*it<<"\n";
+		lh.mainTree->deleteItem(*it);
+	}
+	output.close();
+}//end function printErrorLogAndDeleteErrorKeys
 
-}
-
-bool isDuplicate(Bll* tree, std::ifstream infile)
-{
-	return false;
-}
-
-void printErrorLog()
-{
-
-}
-
+/// <summary>
+/// Prints the merged tree.
+/// </summary>
 void printMergedTree()
 {
+	std::ofstream output;
+	output.open("merged.txt");
+	std::cout << "merged list printed to file: "<< std::endl;
+	lh.mainTree->display(output);
+	output.close();
+}//end function printMergedTree
 
-}
+/// <summary>
+/// loads the data from the specified filename into the Bll bt(binaryTree).
+/// </summary>
+/// <param name="bt">The binary tree to load.</param>
+/// <param name="fileName">Name of the file to load from.</param>
+void dataLoader(Bll* bt, std::string fileName)
+{
+	std::ifstream inFile;
+	double toList;
+	bool fileNotFoundError = false;
+	bool goodData = true;
+
+	do
+	{
+		if (fileNotFoundError)
+		{
+			std::cout << "enter the name of the file to load from: "
+				 <<"then press return.\n>>";
+			std::cin >> fileName;
+			if (fileName == "exit")
+			{
+				std::cout << "Good bye";
+				exit(0);
+			}
+		}
+
+		inFile.open(fileName.c_str());
+		if (!inFile)
+		{
+			std::cout << "file not found, type 'exit' to end program, or"
+			<< std::endl;
+			fileNotFoundError = true;
+		}
+	} while (!inFile);
+
+	while (!inFile.eof())
+	{
+		inFile >> toList;
+		goodData = bt->addItem(toList);
+		if (goodData == false)
+		{
+			lh.errList.push_back(toList);
+			lh.errorSet.insert(toList);
+		}
+	}
+
+	std::cout << "data has been successfully loaded." << std::endl;
+	inFile.close();
+}//end function listLoader
 
 
+void printVector(std::vector<double> v)
+{
+	const int size = v.size();
+	std::cout << "vector: ";
+	for (int i = 0; i < size; i++)
+	{
 
+		std::cout << v[i] << ", ";
+	}
+	std::cout << std::endl;
+}//end function printVectorValues
 
-
-
-
-
-/*
- * 	printRandomNumbersToFile(1, 500, 100, "data1.txt");
-	int found;
-	Bll myTree;
-	std::ofstream ofs;
-	std::cout<<"isEmpty: " << myTree.isEmpty()<<std::endl;
-	myTree.addItem(15);
-	myTree.addItem(7);
-	myTree.addItem(22);
-	myTree.addItem(45);
-	std::cout<<"isEmpty: " << myTree.isEmpty()<<std::endl;
-	myTree.traverseTree(Bll::IN_ORDER);
-	myTree.addItem(2);
-	myTree.addItem(12);
-	myTree.addItem(37);
-	myTree.addItem(1);
-	myTree.addItem(25);
-	myTree.addItem(122);
-	myTree.addItem(39);
-	myTree.addItem(1);
-	myTree.addItem(20);
-	myTree.addItem(11);
-	myTree.addItem(337);
-	myTree.addItem(5);
-	myTree.addItem(215);
-	myTree.addItem(102);
-	myTree.addItem(89);
-	myTree.addItem(19);
-	myTree.traverseTree(Bll::IN_ORDER);
-	myTree.traverseTree(Bll::REVERSE_ORDER);
-	myTree.addItem(2);
-	myTree.traverseTree(Bll::BREADTH_FIRST);
-	std::cout << "find 12? : "<< myTree.findItem(12, found)<< std::endl;
-	std::cout << "value in found: "<< found<<std::endl;
-	std::cout << "count: "<< myTree.getCount() << std::endl;
-	std::cout << "qty: " << myTree.getQty() << std::endl;
-	myTree.traverseTree(Bll::IN_ORDER);
-	myTree.deleteItem(15);
-		std::cout << "find 15? : "<< myTree.findItem(15, found)<< std::endl;
-	std::cout << "value in found: "<< found<<std::endl;
-	std::cout << "qty: " << myTree.getQty() << std::endl;
-	myTree.traverseTree(Bll::PRE_ORDER);
-	myTree.traverseTree(Bll::POST_ORDER);
-	myTree.traverseTree(Bll::IN_ORDER);
-	myTree.traverseTree(Bll::POST_ORDER);
-	Bll copied(myTree);
-	copied.traverseTree(Bll::IN_ORDER);
-	copied.traverseTree(Bll::BREADTH_FIRST);
-	std::cout << "\ncopied tree traversal"<<std::endl;
-	copied.traverseTree(Bll::IN_ORDER);
-	copied.deleteItem(37);
-	copied.deleteItem(22);
-	copied.deleteItem(15);
-	copied.traverseTree(Bll::BREADTH_FIRST);
-	copied.traverseTree(Bll::REVERSE_ORDER);
-	Bll operatorTest;
-	operatorTest = copied;
-	std::cout << "operator copied test print: "<< std::endl;
-	operatorTest.traverseTree(Bll::IN_ORDER);
-	operatorTest.traverseTree(Bll::BREADTH_FIRST);
-	std::cout << "count: " << copied.getCount()<< std::endl;
-	copied.traverseTree(Bll::POST_ORDER);
-	myTree.makeEmpty();
-	std::cout << "qty after make empty: " << myTree.getQty() << std::endl;
-	for (size_t i = 0; i < 10000; i++){}
-	printRandomNumbersToFile(1, 500, 100, "data2.txt");
-	return 0;
- */
+void printSet(std::set<double> s)
+{
+	std::set<double>::iterator it;
+	for(it=s.begin(); it != s.end();it++)
+		std::cout<<*it<<" ";
+	std::cout<< std::endl;
+	std::cout << "set size: "<< s.size()<< std::endl;
+}//end function printSet
