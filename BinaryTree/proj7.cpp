@@ -1,10 +1,24 @@
+/**
+ * @FileName proj7.cpp
+ * @Details build a driver program that opens two data files and
+ * loads each into the binary tree, paying special attention to
+ * all duplicates that are rejected and then use the list of
+ * duplicates to print an error log while removing them from the
+ * tree so that non of the items that had a duplicate are in the
+ * final tree. Once that is done it needs to print the final tree
+ * back out to a separate filed name "merged.txt"
+ * @Author Ryan Zurrin
+ * @DateBuilt  4/18/2021
+ * @DueDate 3/6/2021
+ */
+
 #include <fstream>
 #include "binaryTree.h"
 #include <string>
 #include <set>
-#include <sstream>
-#include <stdlib.h>
-#include <ctime>
+//#include <sstream>
+//#include <stdlib.h>
+//#include <ctime>
 
 struct listHolder
 {
@@ -12,11 +26,6 @@ struct listHolder
 	/// The main Tree list
 	/// </summary>
 	Bll* mainTree;
-	/// <summary>
-	/// //holds each repeated error value in the order that it happened, is
-	/// useful to keep track of the total number of errors as well.
-	/// </summary>
-	std::vector<double> errList;
 	/// <summary>
 	/// Set of each error with no duplicates of the errors
 	/// </summary>
@@ -39,11 +48,12 @@ struct listHolder
 
 void printRandomNumbersToFile(
 	int, int, int, const std::string&);
-void printErrorLogAndDeleteErrorKeys(listHolder* );
+void deleteErrorKeys(listHolder* );
 void printMergedTree(listHolder*);
 void dataLoader(listHolder*, std::string);
 static void printVector(std::vector<double>&);
 void printSet(std::set<double>);
+std::string getFormattedTime(void);
 
 /// <summary>
 /// The Main method.
@@ -54,14 +64,17 @@ int main()
 	listHolder* lh = new listHolder;
 	dataLoader(lh, "data1.txt");
 	dataLoader(lh, "data2.txt");
-	printErrorLogAndDeleteErrorKeys(lh);
+	deleteErrorKeys(lh);
 	printMergedTree(lh);
 
+	delete lh;
+
 	return 0;
-}
+}//end method main
 
 /// <summary>
-/// Prints random numbers to file.
+/// Utility function that help to prints random numbers to file.
+/// Used for testing.
 /// </summary>
 /// <param name="min">the lower bound of the random numbers</param>
 /// <param name="max">the upper bound of the random numbers</param>
@@ -88,26 +101,14 @@ void printRandomNumbersToFile(
 /// Prints the error log and deletes the  error keys from tree list
 /// </summary>
 /// <param name="s">The set that holds the error values.</param>
-void printErrorLogAndDeleteErrorKeys(listHolder* lh)
+void deleteErrorKeys(listHolder* lh)
 {
-	std::ofstream output;
-	output.open("errors.txt");
-	int pos = 1;
-	time_t* timeReport = new time_t;
-	struct tm* t_info;
-	time(timeReport);
-	t_info = localtime(timeReport);
-	output << "Error log generated on: " << asctime(t_info) <<"\n"
-		   << "Total errors counted: "<< lh->errList.size() << "\n"
-		   << "Unique errors logged: "<< lh->errorSet.size() << std::endl;
 	std::set<double>::iterator it;
 	for(it=lh->errorSet.begin(); it != lh->errorSet.end();it++)
 	{
-		output<< std::setw(6)<< std::left <<*it<<(pos%10==0?'\n':' ');
 		lh->mainTree->deleteItem(*it);
-		pos++;
 	}
-	output.close();
+
 }//end function printErrorLogAndDeleteErrorKeys
 
 /// <summary>
@@ -130,9 +131,20 @@ void printMergedTree(listHolder* lh)
 void dataLoader(listHolder* lh, std::string fileName)
 {
 	std::ifstream inFile;
+
+	std::ofstream errorOut;
+	errorOut.open("errors.txt");
 	double toList;
 	bool fileNotFoundError = false;
 	bool goodData = true;
+	int pos = 1;
+	int errCount = 0;
+	/*
+	time_t* timeReport = new time_t;
+	struct tm* t_info;
+	time(timeReport);
+	t_info = localtime(timeReport);
+	*/
 
 	do
 	{
@@ -163,15 +175,34 @@ void dataLoader(listHolder* lh, std::string fileName)
 		goodData = lh->mainTree->addItem(toList);
 		if (goodData == false)
 		{
-			lh->errList.push_back(toList);
+			errorOut << std::setw(6)<< std::left <<toList<<(pos%10==0?'\n':' ');
+			pos++; errCount++;
 			lh->errorSet.insert(toList);
 		}
 	}
-
+	errorOut << "\nError log generated on: " << getFormattedTime()
+	<< "total errors logged: "<< errCount << std::endl;
 	std::cout << "data has been successfully loaded." << std::endl;
 	inFile.close();
+	errorOut.close();
 }//end function listLoader
 
+/// <summary>
+/// Gets the formatted time.
+/// </summary>
+/// <returns></returns>
+std::string getFormattedTime(void)
+{
+	std::string tNd;
+	time_t now = time(NULL);
+	//char *str = asctime(localtime(&now));
+	tm now_tm = {};
+	char str[26] = {};
+	localtime_s(&now_tm, &now);
+	asctime_s(str, 26, &now_tm);
+	tNd = str;
+	return tNd;
+}
 
 /// <summary>
 /// Prints the vector.
